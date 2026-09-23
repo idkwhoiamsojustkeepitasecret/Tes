@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ajakan Halloween</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:radial-gradient(circle at 50% 20%,#2b1b3d,#0f0a1a);
+    font-family:'Comic Sans MS',system-ui,sans-serif;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;position:relative;
+    color:#fff;
+  }
+
+  #card{
+    background:#fff0f4;
+    color:#7a2f52;
+    padding:32px 24px;
+    border-radius:24px;
+    text-align:center;
+    max-width:340px;
+    width:88%;
+    box-shadow:0 20px 40px rgba(0,0,0,.4);
+    position:relative;
+    z-index:5;
+  }
+  #card h1{
+    font-size:1.4rem;
+    margin:0 0 24px;
+    color:#e05c8a;
+  }
+  .btnRow{
+    display:flex;
+    justify-content:center;
+    gap:16px;
+    position:relative;
+    min-height:60px;
+  }
+  button{
+    border:none;
+    border-radius:999px;
+    padding:14px 28px;
+    font-size:1.1rem;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+    min-width:100px;
+  }
+  #yesBtn{ background:#ff9f43; color:#3a1c00; }
+  #noBtn{ background:#f4c2d7; color:#7a2f52; }
+  #card.dodging #noBtn{ position:fixed; }
+
+  #boo{
+    position:fixed; inset:0; z-index:19; display:none;
+    align-items:center; justify-content:center; flex-direction:column;
+    background:#000; text-align:center;
+    animation:flash .1s steps(2) 6;
+  }
+  #boo.show{display:flex}
+  #boo video{
+    width:100%; height:100%; object-fit:cover;
+    position:absolute; inset:0;
+  }
+  #boo button{
+    margin-top:24px; background:#ff8fb1; color:#3a0015;
+    position:relative; z-index:2;
+  }
+  @keyframes flash{ 0%,100%{filter:invert(0) brightness(1)} 50%{filter:invert(1) brightness(2)} }
+</style>
+</head>
+<body>
+
+  <div id="card">
+    <h1>Mau rayain Halloween bareng aku? 🎃</h1>
+    <div class="btnRow">
+      <button id="yesBtn">Ya 🎃</button>
+      <button id="noBtn">Tidak 🕸️</button>
+    </div>
+  </div>
+
+  <div id="boo">
+    <video id="jumpVideo" src="jumpscare.mp4" playsinline webkit-playsinline muted="false"></video>
+    <button onclick="location.reload()">Ulangi</button>
+  </div>
+
+<script>
+  const noBtn = document.getElementById('noBtn');
+  const yesBtn = document.getElementById('yesBtn');
+  const card = document.getElementById('card');
+  const boo = document.getElementById('boo');
+
+  let dodges = 0;
+  const MAX_DODGES = 3; // "Tidak" kabur berapa kali sebelum menyerah kena jumpscare
+
+  function moveNoButton(){
+    card.classList.add('dodging');
+    const w = window.innerWidth, h = window.innerHeight;
+    const btnW = noBtn.offsetWidth, btnH = noBtn.offsetHeight;
+    const x = Math.random() * (w - btnW - 20) + 10;
+    const y = Math.random() * (h - btnH - 20) + 10;
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
+  }
+
+  const jumpVideo = document.getElementById('jumpVideo');
+
+  function jumpscare(){
+    boo.classList.add('show');
+    if(navigator.vibrate) navigator.vibrate([50,30,50,30,200]);
+
+    // putar video dari awal setiap kali jumpscare muncul
+    jumpVideo.currentTime = 0;
+    jumpVideo.play().catch(()=>{
+      // kalau browser tetap menolak suara, video tetap tampil tanpa suara
+    });
+  }
+
+  // "Tidak" kabur dulu saat disentuh/hover, baru jumpscare setelah tertangkap
+  noBtn.addEventListener('mouseenter', dodgeOrScare);
+  noBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); dodgeOrScare(); }, {passive:false});
+  noBtn.addEventListener('click', jumpscare);
+
+  function dodgeOrScare(){
+    dodges++;
+    if(dodges >= MAX_DODGES) return; // biarkan klik berikutnya kena jumpscare
+    moveNoButton();
+  }
+
+  // "Ya" juga langsung memicu jumpscare yang sama
+  yesBtn.addEventListener('click', jumpscare);
+</script>
+</body>
+</html>
